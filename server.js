@@ -119,11 +119,18 @@ app.use('/uploads', express.static('uploads'));
 app.use(express.static('public'));
 app.use(express.static(__dirname));
 
-// ⭐ DEPLOYMENT FIX: Session with production-ready cookies
+import MongoStore from 'connect-mongo';
+
+// ⭐ DEPLOYMENT FIX: Session with production-ready cookies & MongoDB Store
 app.use(session({
   secret: process.env.SESSION_SECRET || 'greencredits-secret-key-2025',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60 // 1 Day
+  }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000,
