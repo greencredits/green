@@ -2026,36 +2026,44 @@ const autoSeed = async () => {
 // START SERVER
 // ============================================
 
-httpServer.listen(PORT, '0.0.0.0', async () => {
-  await autoSeed(); // Run seed check on start
-  console.log(`
+// 🛡️ CRASH LOGGING: Catch unhandled errors
+process.on('uncaughtException', (err) => {
+  console.error('❌ CRITICAL: Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ CRITICAL: Unhandled Rejection:', reason);
+});
+
+const startServer = async () => {
+  try {
+    httpServer.listen(PORT, '0.0.0.0', async () => {
+      console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║   🌿 GREEN CREDITS - WASTE MANAGEMENT SYSTEM 🌿               ║
+║   🚀 SERVER STARTED (v1.0.1)                                  ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
-
+ 
 🚀 Server running on port ${PORT}
-📱 Main App: http://localhost:${PORT}
-👮 Admin Panel: http://localhost:${PORT}/admin.html
-👷 Worker Login: http://localhost:${PORT}/worker-login.html
-📝 Worker Register: http://localhost:${PORT}/worker-register.html
+`);
 
-✅ Setup Demo Accounts:
-   http://localhost:${PORT}/api/admin/create-demo-accounts
+      try {
+        console.log('🌱 Starting Auto-Seed Process...');
+        await autoSeed();
+        console.log('✅ Auto-Seed Process Finished');
+      } catch (seedError) {
+        console.error('❌ Auto-Seed Failed (Non-Fatal):', seedError);
+      }
+    });
+  } catch (error) {
+    console.error('❌ Server Start Failed:', error);
+    process.exit(1);
+  }
+};
 
-📋 FEATURES:
-   ✅ MongoDB-only (NO JSON files)
-   ✅ Auto zone assignment for reports
-   ✅ Super Admin creates officers
-   ✅ Officers see only their zone reports
-   ✅ Workers self-register with approval
-   ✅ Zone-based filtering system
-
-🔐 DEFAULT LOGINS (after setup):
-   Super Admin: cmo@gonda.gov.in / SuperAdmin@2025
-   Officers: officer1@gonda.gov.in / Officer@123
-   Workers: 9999999991 / Worker@123
+startServer();
 
 💾 Database: MongoDB Connected ✅
 `);
