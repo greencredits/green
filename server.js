@@ -2065,6 +2065,3 @@ const startServer = async () => {
 
 startServer();
 
-💾 Database: MongoDB Connected ✅
-`);
-});
