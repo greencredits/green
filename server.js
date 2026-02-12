@@ -1921,10 +1921,39 @@ app.delete('/api/admin/officers/:id', async (req, res) => {
 });
 
 // ============================================
+// AUTO-SEED ON STARTUP
+// ============================================
+const autoSeed = async () => {
+  try {
+    const adminCount = await Admin.countDocuments();
+    if (adminCount === 0) {
+      console.log('🌱 No admins found. Auto-seeding default Super Admin...');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('SuperAdmin@2025', salt);
+
+      await Admin.create({
+        name: 'Super Admin',
+        email: 'cmo@gonda.gov.in',
+        password: hashedPassword,
+        role: 'super_admin',
+        mobile: '9999999999',
+        assignedZones: ['All']
+      });
+      console.log('✅ Default Super Admin created: cmo@gonda.gov.in / SuperAdmin@2025');
+    } else {
+      console.log('✅ Admins already exist. Skipping auto-seed.');
+    }
+  } catch (error) {
+    console.error('❌ Auto-seed failed:', error);
+  }
+};
+
+// ============================================
 // START SERVER
 // ============================================
 
-httpServer.listen(PORT, '0.0.0.0', () => {
+httpServer.listen(PORT, '0.0.0.0', async () => {
+  await autoSeed(); // Run seed check on start
   console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
