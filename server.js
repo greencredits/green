@@ -377,6 +377,10 @@ app.get('/api/check-session', async (req, res) => {
   }
 });
 
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', version: '2.0', message: 'System Operational' });
+});
+
 // ============================================
 // ADMIN AUTHENTICATION
 // ============================================
@@ -1925,24 +1929,23 @@ app.delete('/api/admin/officers/:id', async (req, res) => {
 // ============================================
 const autoSeed = async () => {
   try {
-    // 1. Super Admin
+    // 1. Super Admin (NUCLEAR OPTION: Delete & Recreate to ensure clean state)
+    await Admin.deleteOne({ email: 'cmo@gonda.gov.in' });
+    console.log('🗑️ Old Super Admin deleted (cleanup)');
+
     const salt = await bcrypt.genSalt(10);
     const superAdminPass = await bcrypt.hash('SuperAdmin@2025', salt);
 
-    await Admin.findOneAndUpdate(
-      { email: 'cmo@gonda.gov.in' },
-      {
-        name: 'Super Admin',
-        email: 'cmo@gonda.gov.in',
-        password: superAdminPass,
-        role: 'super_admin',
-        mobile: '9999999999',
-        assignedZones: ['All'],
-        isActive: true
-      },
-      { upsert: true, new: true }
-    );
-    console.log('✅ Super Admin synced (Active)');
+    await Admin.create({
+      name: 'Super Admin',
+      email: 'cmo@gonda.gov.in',
+      password: superAdminPass,
+      role: 'super_admin',
+      mobile: '9999999999',
+      assignedZones: ['All'],
+      isActive: true
+    });
+    console.log('✅ Super Admin RE-CREATED (Active) - PASSWORD: SuperAdmin@2025');
 
     // 2. Zone Officers
     const officerPass = await bcrypt.hash('Officer@123', salt);
