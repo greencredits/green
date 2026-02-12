@@ -76,6 +76,12 @@ io.on('connection', (socket) => {
 });
 
 // MongoDB Connection
+if (!process.env.MONGODB_URI) {
+  console.error('❌ CRITICAL ERROR: MONGODB_URI environment variable is missing!');
+  console.error('👉 Please add MONGODB_URI to your Railway/Render environment variables.');
+  process.exit(1);
+}
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
