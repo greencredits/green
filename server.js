@@ -1926,45 +1926,48 @@ app.delete('/api/admin/officers/:id', async (req, res) => {
 const autoSeed = async () => {
   try {
     // 1. Super Admin
-    const superAdminExists = await Admin.exists({ email: 'cmo@gonda.gov.in' });
-    if (!superAdminExists) {
-      console.log('🌱 Creating Default Super Admin...');
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('SuperAdmin@2025', salt);
-      await Admin.create({
+    const salt = await bcrypt.genSalt(10);
+    const superAdminPass = await bcrypt.hash('SuperAdmin@2025', salt);
+
+    await Admin.findOneAndUpdate(
+      { email: 'cmo@gonda.gov.in' },
+      {
         name: 'Super Admin',
         email: 'cmo@gonda.gov.in',
-        password: hashedPassword,
+        password: superAdminPass,
         role: 'super_admin',
         mobile: '9999999999',
-        assignedZones: ['All']
-      });
-    }
+        assignedZones: ['All'],
+        isActive: true
+      },
+      { upsert: true, new: true }
+    );
+    console.log('✅ Super Admin synced (Active)');
 
     // 2. Zone Officers
-    const officerExists = await Admin.exists({ email: 'officer1@gonda.gov.in' });
-    if (!officerExists) {
-      console.log('🌱 Creating Default Officers...');
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('Officer@123', salt);
+    const officerPass = await bcrypt.hash('Officer@123', salt);
+    const officers = [
+      { name: 'Ramesh Gupta', email: 'officer1@gonda.gov.in', zones: ['Zone 1 - North Gonda', 'Zone 2 - South Gonda'] },
+      { name: 'Suresh Verma', email: 'officer2@gonda.gov.in', zones: ['Zone 3 - East Gonda', 'Zone 4 - West Gonda'] },
+      { name: 'Mahesh Singh', email: 'officer3@gonda.gov.in', zones: ['Zone 5 - Central Gonda'] }
+    ];
 
-      const officers = [
-        { name: 'Ramesh Gupta', email: 'officer1@gonda.gov.in', zones: ['Zone 1 - North Gonda', 'Zone 2 - South Gonda'] },
-        { name: 'Suresh Verma', email: 'officer2@gonda.gov.in', zones: ['Zone 3 - East Gonda', 'Zone 4 - West Gonda'] },
-        { name: 'Mahesh Singh', email: 'officer3@gonda.gov.in', zones: ['Zone 5 - Central Gonda'] }
-      ];
-
-      for (const off of officers) {
-        await Admin.create({
+    for (const off of officers) {
+      await Admin.findOneAndUpdate(
+        { email: off.email },
+        {
           name: off.name,
           email: off.email,
-          password: hashedPassword,
+          password: officerPass,
           role: 'zone_officer',
           mobile: '9999999990',
-          assignedZones: off.zones
-        });
-      }
+          assignedZones: off.zones,
+          isActive: true
+        },
+        { upsert: true, new: true }
+      );
     }
+    console.log('✅ Officers synced (Active)');
 
     // 3. Workers
     const workerExists = await Worker.exists({ mobile: '9999999991' });
