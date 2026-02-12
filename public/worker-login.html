@@ -135,7 +135,11 @@
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" id="workerPassword" placeholder="Enter your password" required>
+                <div style="position: relative;">
+                    <input type="password" id="workerPassword" placeholder="Enter your password" required>
+                    <span id="toggleWorkerPassword"
+                        style="position: absolute; right: 15px; top: 12px; cursor: pointer; font-size: 1.2rem;">👁️</span>
+                </div>
             </div>
 
             <button type="submit" class="btn-login">
@@ -194,6 +198,16 @@
                 console.error(error);
                 alert('❌ Network Error: Could not connect to server.\n\nIs "node server.js" running?');
             }
+        });
+
+        // Password Toggle Logic
+        const toggleWorkerPassword = document.querySelector('#toggleWorkerPassword');
+        const workerPassword = document.querySelector('#workerPassword');
+
+        toggleWorkerPassword.addEventListener('click', function (e) {
+            const type = workerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            workerPassword.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '🙈';
         });
     </script>
 </body>

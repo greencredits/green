@@ -70,7 +70,11 @@
     <div id="error" class="error"></div>
     <form id="form">
       <input type="email" id="email" placeholder="Email" value="admin@greencredits.com" required>
-      <input type="password" id="password" placeholder="Password" value="admin123" required>
+      <div style="position: relative;">
+        <input type="password" id="password" placeholder="Password" value="SuperAdmin@2025" required>
+        <span id="togglePassword"
+          style="position: absolute; right: 15px; top: 15px; cursor: pointer; font-size: 1.2rem;">👁️</span>
+      </div>
       <button type="submit">Login</button>
     </form>
   </div>
@@ -107,6 +111,16 @@
         btn.disabled = false;
         btn.textContent = 'Login';
       }
+    });
+
+    // Password Toggle
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function (e) {
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+      this.textContent = type === 'password' ? '👁️' : '🙈';
     });
   </script>
 </body>

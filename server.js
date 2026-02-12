@@ -1925,12 +1925,12 @@ app.delete('/api/admin/officers/:id', async (req, res) => {
 // ============================================
 const autoSeed = async () => {
   try {
-    const adminCount = await Admin.countDocuments();
-    if (adminCount === 0) {
-      console.log('🌱 No admins found. Auto-seeding default Super Admin...');
+    // 1. Super Admin
+    const superAdminExists = await Admin.exists({ email: 'cmo@gonda.gov.in' });
+    if (!superAdminExists) {
+      console.log('🌱 Creating Default Super Admin...');
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('SuperAdmin@2025', salt);
-
       await Admin.create({
         name: 'Super Admin',
         email: 'cmo@gonda.gov.in',
@@ -1939,10 +1939,64 @@ const autoSeed = async () => {
         mobile: '9999999999',
         assignedZones: ['All']
       });
-      console.log('✅ Default Super Admin created: cmo@gonda.gov.in / SuperAdmin@2025');
-    } else {
-      console.log('✅ Admins already exist. Skipping auto-seed.');
     }
+
+    // 2. Zone Officers
+    const officerExists = await Admin.exists({ email: 'officer1@gonda.gov.in' });
+    if (!officerExists) {
+      console.log('🌱 Creating Default Officers...');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('Officer@123', salt);
+
+      const officers = [
+        { name: 'Ramesh Gupta', email: 'officer1@gonda.gov.in', zones: ['Zone 1 - North Gonda', 'Zone 2 - South Gonda'] },
+        { name: 'Suresh Verma', email: 'officer2@gonda.gov.in', zones: ['Zone 3 - East Gonda', 'Zone 4 - West Gonda'] },
+        { name: 'Mahesh Singh', email: 'officer3@gonda.gov.in', zones: ['Zone 5 - Central Gonda'] }
+      ];
+
+      for (const off of officers) {
+        await Admin.create({
+          name: off.name,
+          email: off.email,
+          password: hashedPassword,
+          role: 'zone_officer',
+          mobile: '9999999990',
+          assignedZones: off.zones
+        });
+      }
+    }
+
+    // 3. Workers
+    const workerExists = await Worker.exists({ mobile: '9999999991' });
+    if (!workerExists) {
+      console.log('🌱 Creating Default Workers...');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('Worker@123', salt);
+
+      const workers = [
+        { name: 'Raju Worker', mobile: '9999999991', zone: 'Zone 1 - North Gonda' },
+        { name: 'Suresh Worker', mobile: '9999999992', zone: 'Zone 2 - South Gonda' }
+      ];
+
+      // Need an admin ID for approval
+      const admin = await Admin.findOne({ email: 'cmo@gonda.gov.in' });
+
+      for (const w of workers) {
+        await Worker.create({
+          name: w.name,
+          mobile: w.mobile,
+          email: `${w.mobile}@worker.com`,
+          password: hashedPassword,
+          aadhaar: `123456${w.mobile}`,
+          address: 'Gonda',
+          assignedZone: w.zone,
+          status: 'approved',
+          approvedBy: admin?._id || null,
+          approvedDate: new Date()
+        });
+      }
+    }
+    console.log('✅ Auto-seed check complete. Database ready.');
   } catch (error) {
     console.error('❌ Auto-seed failed:', error);
   }
