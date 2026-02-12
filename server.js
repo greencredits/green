@@ -11,6 +11,7 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto'; // 🛡️ For Duplicate Detection
 import bcrypt from 'bcryptjs'; // 🔐 For Password Hashing
+import MongoStore from 'connect-mongo';
 
 // Import models
 import User from './models/User.js';
@@ -119,7 +120,7 @@ app.use('/uploads', express.static('uploads'));
 app.use(express.static('public'));
 app.use(express.static(__dirname));
 
-import MongoStore from 'connect-mongo';
+app.use(express.static(__dirname));
 
 // ⭐ DEPLOYMENT FIX: Session with production-ready cookies & MongoDB Store
 app.use(session({
