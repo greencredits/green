@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto'; // 🛡️ For Duplicate Detection
+import bcrypt from 'bcryptjs'; // 🔐 For Password Hashing
 
 // Import models
 import User from './models/User.js';
