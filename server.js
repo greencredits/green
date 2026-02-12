@@ -120,7 +120,6 @@ app.use('/uploads', express.static('uploads'));
 app.use(express.static('public'));
 app.use(express.static(__dirname));
 
-app.use(express.static(__dirname));
 
 // ⭐ DEPLOYMENT FIX: Session with production-ready cookies & MongoDB Store
 app.use(session({
